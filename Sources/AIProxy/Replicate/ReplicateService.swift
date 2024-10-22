@@ -969,7 +969,7 @@ private func mapBase64DataURIToData(_ dataURI: String) -> Data? {
     return dataURI.split(separator: ",").last.flatMap { Data(base64Encoded: String($0)) }
 }
 
-public enum ReplicateWebhookFilterEvent: Encodable {
+public enum ReplicateWebhookFilterEvent: String, Encodable {
     case start
     case output
     case logs
