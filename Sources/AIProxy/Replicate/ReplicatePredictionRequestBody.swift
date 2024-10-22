@@ -15,24 +15,36 @@ public struct ReplicatePredictionRequestBody: Encodable {
 
     /// The version of the model to run
     public let version: String?
+    
+    public let webhookURL: URL?
+    
+    public let webhookEventsFilter: [ReplicateWebhookFilterEvent]
 
     public init(
         input: any Encodable,
-        version: String? = nil
+        version: String? = nil,
+        webhookURL: URL? = nil,
+        webhookEventsFilter: [ReplicateWebhookFilterEvent] = []
     ) {
         self.input = input
         self.version = version
+        self.webhookURL = webhookURL
+        self.webhookEventsFilter = webhookEventsFilter
     }
 
-    private enum RootKey: CodingKey {
+    private enum RootKey: String, CodingKey {
         case input
         case version
+        case webhookURL = "webhook"
+        case webhookEventsFilter = "webhook_events_filter"
     }
 
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: RootKey.self)
         try container.encode(self.input, forKey: .input)
         try container.encodeIfPresent(self.version, forKey: .version)
+        try container.encodeIfPresent(self.webhookURL, forKey: .webhookURL)
+        try container.encodeIfPresent(self.webhookEventsFilter, forKey: .webhookEventsFilter)
     }
 }
 

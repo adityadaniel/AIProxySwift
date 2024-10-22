@@ -43,14 +43,18 @@ public final class ReplicateService {
     public func createFluxSchnellImage(
         input: ReplicateFluxSchnellInputSchema,
         pollAttempts: Int = 30,
-        secondsBetweenPollAttempts: UInt64 = 1
+        secondsBetweenPollAttempts: UInt64 = 1,
+        webhookURL: URL?,
+        webhookEventsFilter: [ReplicateWebhookFilterEvent]
     ) async throws -> [URL] {
         return try await self.predictAndPollUsingOfficialModel(
             modelOwner: "black-forest-labs",
             modelName: "flux-schnell",
             input: input,
             pollAttempts: pollAttempts,
-            secondsBetweenPollAttempts: secondsBetweenPollAttempts
+            secondsBetweenPollAttempts: secondsBetweenPollAttempts,
+            webhookURL: webhookURL,
+            webhookEventsFilter: webhookEventsFilter
         )
     }
 
@@ -133,14 +137,18 @@ public final class ReplicateService {
     public func createFluxProImage(
         input: ReplicateFluxProInputSchema,
         pollAttempts: Int = 30,
-        secondsBetweenPollAttempts: UInt64 = 2
+        secondsBetweenPollAttempts: UInt64 = 2,
+        webhookURL: URL?,
+        webhookEventsFilter: [ReplicateWebhookFilterEvent]
     ) async throws -> URL {
         return try await self.predictAndPollUsingOfficialModel(
             modelOwner: "black-forest-labs",
             modelName: "flux-pro",
             input: input,
             pollAttempts: pollAttempts,
-            secondsBetweenPollAttempts: secondsBetweenPollAttempts
+            secondsBetweenPollAttempts: secondsBetweenPollAttempts,
+            webhookURL: webhookURL,
+            webhookEventsFilter: webhookEventsFilter
         )
     }
 
@@ -222,14 +230,18 @@ public final class ReplicateService {
     public func createFluxProImage_v1_1(
         input: ReplicateFluxProInputSchema_v1_1,
         pollAttempts: Int = 30,
-        secondsBetweenPollAttempts: UInt64 = 2
+        secondsBetweenPollAttempts: UInt64 = 2,
+        webhookURL: URL?,
+        webhookEventsFilter: [ReplicateWebhookFilterEvent] = []
     ) async throws -> URL {
         return try await self.predictAndPollUsingOfficialModel(
             modelOwner: "black-forest-labs",
             modelName: "flux-1.1-pro",
             input: input,
             pollAttempts: pollAttempts,
-            secondsBetweenPollAttempts: secondsBetweenPollAttempts
+            secondsBetweenPollAttempts: secondsBetweenPollAttempts,
+            webhookURL: webhookURL,
+            webhookEventsFilter: webhookEventsFilter
         )
     }
 
@@ -282,14 +294,18 @@ public final class ReplicateService {
     public func createFluxDevImage(
         input: ReplicateFluxDevInputSchema,
         pollAttempts: Int = 30,
-        secondsBetweenPollAttempts: UInt64 = 1
+        secondsBetweenPollAttempts: UInt64 = 1,
+        webhookURL: URL?,
+        webhookEventsFilter: [ReplicateWebhookFilterEvent]
     ) async throws -> [URL] {
         return try await self.predictAndPollUsingOfficialModel(
             modelOwner: "black-forest-labs",
             modelName: "flux-dev",
             input: input,
             pollAttempts: pollAttempts,
-            secondsBetweenPollAttempts: secondsBetweenPollAttempts
+            secondsBetweenPollAttempts: secondsBetweenPollAttempts,
+            webhookURL: webhookURL,
+            webhookEventsFilter: webhookEventsFilter
         )
     }
 
@@ -607,6 +623,8 @@ public final class ReplicateService {
         modelOwner: String,
         modelName: String,
         input: T,
+        webhookURL: URL?,
+        webhookEventsFilter: [ReplicateWebhookFilterEvent],
         output: U.Type
     )  async throws -> U {
         let encoder = JSONEncoder()
@@ -900,12 +918,16 @@ public final class ReplicateService {
         modelName: String,
         input: T,
         pollAttempts: Int,
-        secondsBetweenPollAttempts: UInt64
+        secondsBetweenPollAttempts: UInt64,
+        webhookURL: URL?,
+        webhookEventsFilter: [ReplicateWebhookFilterEvent]
     ) async throws -> U {
         let predictionResponse = try await self.createPredictionUsingOfficialModel(
             modelOwner: modelOwner,
             modelName: modelName,
             input: input,
+            webhookURL: webhookURL,
+            webhookEventsFilter: webhookEventsFilter,
             output: ReplicatePredictionResponseBody<U>.self
         )
         return try await self.pollForPredictionOutput(
@@ -940,4 +962,11 @@ private func mapBase64DataURIsToData(_ dataURIs: [String]) -> [Data] {
 
 private func mapBase64DataURIToData(_ dataURI: String) -> Data? {
     return dataURI.split(separator: ",").last.flatMap { Data(base64Encoded: String($0)) }
+}
+
+public enum ReplicateWebhookFilterEvent: Encodable {
+    case start
+    case output
+    case logs
+    case completed
 }
