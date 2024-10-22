@@ -630,9 +630,14 @@ public final class ReplicateService {
         let encoder = JSONEncoder()
         let body = try encoder.encode(
             ReplicatePredictionRequestBody(
-                input: input
+                input: input,
+                webhookURL: webhookURL,
+                webhookEventsFilter: webhookEventsFilter
             )
         )
+        
+        print(">>>da-dbg: ", String(data: body, encoding: .utf8))
+        
         let request = try await AIProxyURLRequest.create(
             partialKey: self.partialKey,
             serviceURL: self.serviceURL,
